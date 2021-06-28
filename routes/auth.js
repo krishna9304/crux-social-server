@@ -1,78 +1,164 @@
 let router = require("express").Router();
 let jwt = require("jsonwebtoken");
+let bcrypt = require("bcrypt");
 let Student = require("../database/modals/student");
+let College = require("../database/modals/college");
+let isempty = require("isempty");
+const chalk = require("chalk");
 
-router.post("/login", (req, res, next) => {
-  let { regdNo, password } = req.body;
+router.post("/register", (req, res, next) => {
+  let data = req.body;
+  let collegeName = data.college;
+  College.findOne({ name: data.college }).then((coldoc) => {
+    Student.exists(
+      { regdNo: data.regdNo, college: coldoc._id },
+      (err, result) => {
+        if (err) next(err);
+        if (result === false) {
+          //passoword hashing and salting
+          bcrypt.hash(data.password, 10, (err, enc_pass) => {
+            if (err) next(err);
 
-  Student.exists({ regdNo }, (err, result) => {
-    if (err) next(err);
-
-    console.log({ err, result });
-
-    if (result) {
-      //getting the user data from the database
-      Student.findOne({ regdNo })
-        .then((doc) => {
-          if (err) next(err);
-          if (password === doc.password) {
-            //successful login
-            let token = jwt.sign(
-              { name: doc.name, regdNo: doc.regdNo },
-              process.env.JWT_PASS,
-              {
-                expiresIn: "2h",
-              }
-            );
-            res.cookie("jwt", token);
-
-            res.send({
-              userdata: doc,
-              res: true,
-              msg: "Your login successful.",
-            });
-          } else {
-            res.status(403).send({
-              res: false,
-              msg: "The password you have entered is incorrect",
-            });
-          }
-        })
-        .catch((err) => {
-          next(err);
-        });
-    } else {
-      res.status(403).send({
-        res: false,
-        msg: "No user was found from the given detail",
-      });
-    }
+            data.password = enc_pass;
+            data.college = coldoc._id;
+            //saving the data to the database
+            let student = new Student(data);
+            student
+              .save()
+              .then((doc) => {
+                College.findOne({ name: collegeName }).then((collegeDoc) => {
+                  console.log(collegeDoc);
+                  collegeDoc.students = [...collegeDoc.students, doc._id];
+                  collegeDoc.save();
+                });
+                res.send({
+                  userdata: doc,
+                  res: true,
+                  msg: "Student registered successfully",
+                });
+              })
+              .catch((err) => {
+                next(err);
+              });
+          });
+        } else {
+          res.send({
+            res: false,
+            msg: "Student with the give regdNo number already registered",
+          });
+        }
+      }
+    );
   });
 });
 
-router.post("/verifyToken", (req, res) => {
+router.post("/login", (req, res, next) => {
+  let { college, regdNo, password } = req.body;
+  if (isempty(college))
+    res.send({
+      res: false,
+      msg: "Please select a college!!",
+    });
+  else if (isempty(regdNo))
+    res.send({
+      res: false,
+      msg: "Please enter your registration number!!",
+    });
+  else if (isempty(password))
+    res.send({
+      res: false,
+      msg: "Please enter your password!!",
+    });
+  else {
+    let collegeID = null;
+    College.findOne({ name: college })
+      .then((doc) => {
+        collegeID = doc._id;
+      })
+      .catch(next);
+    Student.find({ regdNo })
+      .then((doc) => {
+        if (doc.length == 0) {
+          res.send({
+            res: false,
+            msg: "Wrong registration number!!",
+          });
+        } else {
+          let found = false;
+          for (let student of doc) {
+            if (String(student.college) == String(collegeID)) {
+              found = true;
+              let hash = student.password;
+              bcrypt.compare(password, hash, (err, same) => {
+                if (err) next(err);
+                if (same) {
+                  //successful login
+                  let token = jwt.sign(
+                    {
+                      id: student._id,
+                      name: student.name,
+                      regdNo: student.regdNo,
+                    },
+                    process.env.JWT_PASS,
+                    {
+                      expiresIn: "10h",
+                    }
+                  );
+                  res.send({
+                    userdata: student,
+                    res: true,
+                    msg: "Your login was successful.",
+                    jwt: token,
+                  });
+                } else {
+                  res.send({
+                    res: false,
+                    msg: "The password you have entered is incorrect",
+                  });
+                }
+              });
+            }
+          }
+          if (!found) {
+            res.send({
+              res: false,
+              msg: "No user found with the registration number!!",
+            });
+          }
+        }
+      })
+      .catch(next);
+  }
+});
+
+router.post("/verifyToken", (req, res, next) => {
   let token = req.body.token;
   jwt.verify(token, process.env.JWT_PASS, (err, decoded) => {
     if (err) next(err);
-    Student.exists({ regdNo: decoded.regdNo }, (err, result) => {
-      if (err) next(err);
-      console.log(decoded);
-      if (result === true) {
-        Student.findOne({ regdNo: decoded.regdNo }, (err, doc) => {
-          if (err) next(err);
-          console.log(doc);
-          res.send({
-            userdata: doc,
-            res: true,
+    if (decoded) {
+      Student.exists({ _id: decoded.id }, (err, result) => {
+        if (err) next(err);
+        if (result === true) {
+          Student.findById(decoded.id, (err, doc) => {
+            if (err) next(err);
+            res.send({
+              userdata: doc,
+              res: true,
+            });
           });
-        });
-      } else {
-        res.send({
-          res: false,
-          msg: "User with the following token does not found in the database",
-        });
-      }
-    });
+        } else {
+          res.send({
+            res: false,
+            msg: "Student with the following token does not found in the database",
+          });
+        }
+      });
+    } else {
+      res.send({
+        res: false,
+        msg: "Invalid Token",
+      });
+    }
   });
 });
 

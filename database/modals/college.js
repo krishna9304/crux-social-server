@@ -5,18 +5,16 @@ let CollegeSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  student: {
-    type: String,
-    required: true,
-  },
-  address: {
-    type: String,
-    required: true,
-  },
-  club: {
-    type: String,
-    required: true,
-  },
+  students: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+    },
+  ],
+  clubs: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+    },
+  ],
 });
 
 module.exports = mongoose.model("college", CollegeSchema);

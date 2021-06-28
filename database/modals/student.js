@@ -5,11 +5,15 @@ let StudentSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  college: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
   year: {
     type: String,
     required: true,
   },
-  regNo: {
+  regdNo: {
     type: String,
     required: true,
   },
@@ -23,11 +27,13 @@ let StudentSchema = mongoose.Schema({
   },
   profilepPic: {
     type: String,
-    required: true,
+    default:
+      "https://gravatar.com/avatar/ff132d7a9198e684f60c7f61b00bc757?s=200&d=mp&r=x",
   },
   coverPhoto: {
     type: String,
-    required: true,
+    default:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeYAAABoCAMAAAATgKPhAAAAA1BMVEX///+nxBvIAAAASElEQVR4nO3BMQEAAADCoPVPbQlPoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC+BsXYAAGDbdwQAAAAAElFTkSuQmCC",
   },
   email: {
     type: String,
@@ -35,7 +41,7 @@ let StudentSchema = mongoose.Schema({
   },
   bio: {
     type: String,
-    required: true,
+    default: "This is my bio",
   },
   post: [
     {

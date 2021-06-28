@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <title>Admin Dashboard</title>
+  </head>
+  <body class="w-screen h-screen flex justify-center items-center">
+    <form action="http://localhost:8080/api/v1/auth/register" method="POST">
+      <div class="main-container border flex flex-col p-4 justify-center">
+        Form :
+        <div class="college">
+          <span class="college-label">Select your College</span>
+          <select class="border" name="college">
+            <option value="ITER">ITER</option>
+            <option value="KIIT">KIIT</option>
+          </select>
+        </div>
+        <div class="student-details">
+          <div class="input-name">
+            Name :
+            <input type="text" name="name" placeholder="Name" />
+          </div>
+          <div class="input-year flex">
+            Year :
+            <input type="radio" id="1" name="year" value="1" />
+            <label for="1">Year 1</label><br />
+            <input type="radio" id="2" name="year" value="2" />
+            <label for="2">Year 2</label><br />
+            <input type="radio" id="3" name="year" value="3" />
+            <label for="3">Year 3</label>
+            <input type="radio" id="4" name="year" value="4" />
+            <label for="4">Year 4</label>
+          </div>
+          <div class="input-regdNo">
+            Registration number :
+            <input type="text" name="regdNo" placeholder="regd No." />
+          </div>
+          <div class="input-section">
+            Section :
+            <input type="text" name="section" placeholder="section" />
+          </div>
+          <div class="input-password">
+            Password :
+            <input type="password" name="password" placeholder="password" />
+          </div>
+          <div class="input-gender flex">
+            Gender :
+            <input type="radio" id="Male" name="gender" value="Male" />
+            <label for="Male">Male</label><br />
+            <input type="radio" id="Female" name="gender" value="Female" />
+            <label for="Female">Female</label><br />
+            <input type="radio" id="Others" name="gender" value="Others" />
+            <label for="Others">Others</label>
+          </div>
+          <div class="input-email">
+            Email :
+            <input type="email" name="email" placeholder="email" />
+          </div>
+        </div>
+      </div>
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>

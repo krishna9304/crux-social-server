@@ -1,5 +1,5 @@
 let mongoose = require("mongoose");
-const uri = `mongodb+srv://${process.env.USERNAME}:${process.env.PASS}@cluster0.js5ib.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.USERNAME}:${process.env.PASS}@cluster0.js5ib.mongodb.net/cruxdb?retryWrites=true&w=majority`;
 
 mongoose.connect(uri, {
   useNewUrlParser: true,

@@ -7,6 +7,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 let routes = require("./routes");
+let cookieParser = require("cookie-parser");
 
 let PORT = process.env.PORT || 8080;
 let isDev = process.env.NODE_ENV !== "production";
@@ -21,7 +22,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(morgan("tiny"));
+app.use(express.static("public"));
 app.use("/api/v1", routes);
+app.use(cookieParser());
 
 //error handler
 app.use((err, req, res, next) => {
