@@ -106,6 +106,7 @@ router.post("/login", (req, res, next) => {
                   );
                   res.send({
                     userdata: student,
+                    college: college,
                     res: true,
                     msg: "Your login was successful.",
                     jwt: token,
@@ -141,9 +142,13 @@ router.post("/verifyToken", (req, res, next) => {
         if (result === true) {
           Student.findById(decoded.id, (err, doc) => {
             if (err) next(err);
-            res.send({
-              userdata: doc,
-              res: true,
+            College.findById(doc.college, (err, coldoc) => {
+              if (err) next(err);
+              res.send({
+                userdata: doc,
+                college: coldoc.name,
+                res: true,
+              });
             });
           });
         } else {
