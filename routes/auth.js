@@ -4,6 +4,7 @@ let bcrypt = require("bcrypt");
 let Student = require("../database/modals/student");
 let College = require("../database/modals/college");
 let isempty = require("isempty");
+let mongoose = require("mongoose");
 const chalk = require("chalk");
 
 router.post("/register", (req, res, next) => {
@@ -73,12 +74,12 @@ router.post("/login", (req, res, next) => {
     let collegeID = null;
     College.findOne({ name: college })
       .then((doc) => {
-        collegeID = doc._id;
+        collegeID = String(doc._id);
       })
       .catch(next);
     Student.find({ regdNo })
       .then((doc) => {
-        if (doc.length == 0) {
+        if (doc.length === 0) {
           res.send({
             res: false,
             msg: "Wrong registration number!!",
@@ -86,7 +87,7 @@ router.post("/login", (req, res, next) => {
         } else {
           let found = false;
           for (let student of doc) {
-            if (String(student.college) == String(collegeID)) {
+            if (String(student.college) === collegeID) {
               found = true;
               let hash = student.password;
               bcrypt.compare(password, hash, (err, same) => {

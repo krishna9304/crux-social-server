@@ -49,12 +49,6 @@ let StudentSchema = mongoose.Schema({
       ref: "post",
     },
   ],
-  chats: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "chat",
-    },
-  ],
   section: {
     type: String,
     required: true,
