@@ -5,6 +5,7 @@ router.post("/getInbox", (req, res, next) => {
   let { id } = req.body;
   let chats = [];
   let users = [];
+  let isSelfConvo = false;
   Chat.find({ sentFrom: id })
     .then((docs1) => {
       for (let chat of docs1) {
@@ -13,7 +14,7 @@ router.post("/getInbox", (req, res, next) => {
       Chat.find({ sentTo: id })
         .then((docs2) => {
           for (let chat of docs2) {
-            chats.push(chat.sentTo);
+            chats.push(chat.sentFrom);
           }
           users = uniqueUsers(chats);
           res.send({

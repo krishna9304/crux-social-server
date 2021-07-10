@@ -55,6 +55,7 @@ router.post("/register", (req, res, next) => {
 
 router.post("/login", (req, res, next) => {
   let { college, regdNo, password } = req.body;
+  console.log(college, regdNo, password);
   if (isempty(college))
     res.send({
       res: false,
@@ -74,60 +75,51 @@ router.post("/login", (req, res, next) => {
     let collegeID = null;
     College.findOne({ name: college })
       .then((doc) => {
-        collegeID = String(doc._id);
-      })
-      .catch(next);
-    Student.find({ regdNo })
-      .then((doc) => {
-        if (doc.length === 0) {
-          res.send({
-            res: false,
-            msg: "Wrong registration number!!",
-          });
-        } else {
-          let found = false;
-          for (let student of doc) {
-            if (String(student.college) === collegeID) {
-              found = true;
-              let hash = student.password;
-              bcrypt.compare(password, hash, (err, same) => {
-                if (err) next(err);
-                if (same) {
-                  //successful login
-                  let token = jwt.sign(
-                    {
-                      id: student._id,
-                      name: student.name,
-                      regdNo: student.regdNo,
-                    },
-                    process.env.JWT_PASS,
-                    {
-                      expiresIn: "10h",
-                    }
-                  );
-                  res.send({
-                    userdata: student,
-                    college: college,
-                    res: true,
-                    msg: "Your login was successful.",
-                    jwt: token,
-                  });
-                } else {
-                  res.send({
-                    res: false,
-                    msg: "The password you have entered is incorrect",
-                  });
-                }
-              });
-            }
-          }
-          if (!found) {
+        collegeID = doc._id;
+        console.log(collegeID);
+        Student.exists({ regdNo, college: collegeID }, (err, result) => {
+          if (err) next(err);
+          if (result === false) {
             res.send({
               res: false,
-              msg: "No user found with the registration number!!",
+              msg: "Enter correct match of college and registration number!",
             });
+          } else {
+            Student.findOne({ regdNo, college: collegeID })
+              .then((student) => {
+                let hash = student.password;
+                bcrypt.compare(password, hash, (err, same) => {
+                  if (err) next(err);
+                  if (same) {
+                    let token = jwt.sign(
+                      {
+                        id: student._id,
+                        name: student.name,
+                        regdNo: student.regdNo,
+                      },
+                      process.env.JWT_PASS,
+                      {
+                        expiresIn: "10h",
+                      }
+                    );
+                    res.send({
+                      userdata: student,
+                      college: college,
+                      res: true,
+                      msg: "Your login was successful.",
+                      jwt: token,
+                    });
+                  } else {
+                    res.send({
+                      res: false,
+                      msg: "The password you have entered is incorrect",
+                    });
+                  }
+                });
+              })
+              .catch(next);
           }
-        }
+        });
       })
       .catch(next);
   }
