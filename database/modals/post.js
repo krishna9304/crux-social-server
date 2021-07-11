@@ -20,6 +20,10 @@ let PostSchema = mongoose.Schema({
       ref: "student",
     },
   ],
+  timestamp: {
+    type: String,
+    default: String(Date.now()),
+  },
   postedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "student",

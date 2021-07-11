@@ -3,6 +3,7 @@ let Student = require("../database/modals/student");
 let multer = require("multer");
 let Post = require("../database/modals/post");
 const { v4: uuidv4 } = require("uuid");
+const student = require("../database/modals/student");
 
 const DIR = "./public";
 
@@ -54,5 +55,41 @@ router.post("/createPost", upload.single("picture"), (req, res, next) => {
       next(err);
     });
 });
+
+router.post("/gettimeline", (req, res, next) => {
+  let { id } = req.body;
+  let timeline = [];
+  Student.findById(id)
+    .then((doc) => {
+      let { college, year, section } = doc;
+      Student.find({ college, year, section })
+        .then((docs) => {
+          for (let i = 0; i < docs.length; i++) {
+            let student = docs[i];
+            Post.find({ postedBy: student._id })
+              .then((posts) => {
+                timeline.push(...posts);
+                if (i === docs.length - 1) {
+                  console.log(timeline);
+                  timeline = arrange(timeline);
+                  res.send({
+                    res: true,
+                    timeline: timeline.reverse(),
+                  });
+                }
+              })
+              .catch(next);
+          }
+        })
+        .catch(next);
+    })
+    .catch(next);
+});
+
+let arrange = (timeline) => {
+  return timeline.sort((x, y) => {
+    return parseInt(x.timestamp) - parseInt(y.timestamp);
+  });
+};
 
 module.exports = router;
