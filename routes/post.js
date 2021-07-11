@@ -2,8 +2,9 @@ let router = require("express").Router();
 let Student = require("../database/modals/student");
 let multer = require("multer");
 let Post = require("../database/modals/post");
+const Comment = require("../database/modals/comment");
+
 const { v4: uuidv4 } = require("uuid");
-const student = require("../database/modals/student");
 
 const DIR = "./public";
 
@@ -84,6 +85,84 @@ router.post("/gettimeline", (req, res, next) => {
         .catch(next);
     })
     .catch(next);
+});
+
+router.post("/like", (req, res, next) => {
+  let { postId, userId } = req.body;
+  console.log(userId);
+  Post.findById(postId)
+    .then((doc) => {
+      if (doc.likes.includes(String(userId))) {
+        doc.likes.splice(doc.likes.indexOf(userId));
+        doc
+          .save()
+          .then((final) => {
+            res.send({
+              res: true,
+              post: final,
+              msg: "unLiked ;-)",
+            });
+          })
+          .catch(next);
+      } else {
+        doc.likes = [String(userId), ...doc.likes];
+        doc
+          .save()
+          .then((final) => {
+            res.send({
+              res: true,
+              post: final,
+              msg: "Liked ;-)",
+            });
+          })
+          .catch(next);
+      }
+    })
+    .catch(next);
+});
+
+router.post("/addcomment", (req, res, next) => {
+  let { commentedBy, comment, postId } = req.body;
+  let comm = new Comment({ comment, commentedBy });
+  comm
+    .save()
+    .then((doc) => {
+      Post.findById(postId)
+        .then((postDoc) => {
+          postDoc.comment = [...postDoc.comment, doc._id];
+          postDoc
+            .save()
+            .then((final) => {
+              res.send({
+                res: true,
+                msg: "Commented",
+                comment: final,
+              });
+            })
+            .catch(next);
+        })
+        .catch(next);
+    })
+    .catch(next);
+});
+
+router.post("/getcomments", (req, res, next) => {
+  let { ids } = req.body;
+  let comments = [];
+  for (let i = 0; i < ids.length; i++) {
+    id = ids[i];
+    Comment.findById(id)
+      .then((doc) => {
+        comments.push(doc);
+        if (i === ids.length - 1) {
+          res.send({
+            res: true,
+            comments,
+          });
+        }
+      })
+      .catch(next);
+  }
 });
 
 let arrange = (timeline) => {
