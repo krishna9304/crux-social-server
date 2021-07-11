@@ -35,11 +35,16 @@ var upload = multer({
 });
 
 router.post("/createPost", upload.single("picture"), (req, res, next) => {
+  let isDev = process.env.NODE_ENV !== "production";
   let data = req.body;
   console.log(req.file);
   if (req.file) {
     const url =
-      req.protocol + "://" + "localhost:8080" + "/" + req.file.filename;
+      req.protocol +
+      "://" +
+      (isDev ? "locahost:8080" : "crux-social-api.herokuapp.com") +
+      "/" +
+      req.file.filename;
     data.picture = url;
   }
   let post = new Post(data);
