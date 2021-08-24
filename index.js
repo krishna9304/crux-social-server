@@ -8,7 +8,6 @@ const morgan = require("morgan");
 const bodyParser = require("body-parser");
 let routes = require("./routes");
 let cookieParser = require("cookie-parser");
-const { disconnect } = require("mongoose");
 const Student = require("./database/modals/student");
 
 let PORT = process.env.PORT || 8080;

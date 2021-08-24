@@ -37,12 +37,11 @@ var upload = multer({
 router.post("/createPost", upload.single("picture"), (req, res, next) => {
   let isDev = process.env.NODE_ENV !== "production";
   let data = req.body;
-  console.log(req.file);
   if (req.file) {
     const url =
       req.protocol +
       "://" +
-      (isDev ? "locahost:8080" : "crux-social-api.herokuapp.com") +
+      (isDev ? "localhost:8080" : "crux-social-api.herokuapp.com") +
       "/" +
       req.file.filename;
     data.picture = url;
@@ -76,7 +75,6 @@ router.post("/gettimeline", (req, res, next) => {
               .then((posts) => {
                 timeline.push(...posts);
                 if (i === docs.length - 1) {
-                  console.log(timeline);
                   timeline = arrange(timeline);
                   res.send({
                     res: true,
@@ -94,7 +92,6 @@ router.post("/gettimeline", (req, res, next) => {
 
 router.post("/like", (req, res, next) => {
   let { postId, userId } = req.body;
-  console.log(userId);
   Post.findById(postId)
     .then((doc) => {
       if (doc.likes.includes(String(userId))) {

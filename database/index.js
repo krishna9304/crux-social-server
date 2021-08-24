@@ -1,8 +1,7 @@
 const chalk = require("chalk");
 let mongoose = require("mongoose");
 
-
-const uri = `mongodb+srv://${process.env.DBUSERNAME}:${process.env.PASS}@cluster0.js5ib.mongodb.net/cruxdb?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://cruxdb:UHAjUb37pVbj12dZ@cluster0.js5ib.mongodb.net/cruxdb?retryWrites=true&w=majority`;
 console.log(chalk.bgRedBright(uri));
 
 mongoose.connect(uri, {
